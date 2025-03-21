@@ -562,7 +562,24 @@ int webnet_module_handle_uri(struct webnet_session *session)
         {
             break;
         }
+#ifdef WEBNET_USING_GZIP
+        if (request->support_gzip)
+        {
+            int len = strlen(full_path);
 
+            if(len + sizeof(".gz") < WEBNET_PATH_MAX)
+            {
+                rt_memcpy(&full_path[len], ".gz", sizeof(".gz"));
+
+                if (stat(full_path, &file_stat) >= 0 && !S_ISDIR(file_stat.st_mode))
+                {
+                    /* remove .gz */
+                    full_path[len] = '\0';
+                    break;
+                }
+            }
+        }
+#endif /* WEBNET_USING_GZIP */
         index ++;
     }
 _end_default_files:
